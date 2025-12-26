@@ -2,33 +2,22 @@ pipeline {
     agent any
 
     stages {
-
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build Docker Images') {
             steps {
                 sh 'docker compose -f docker-compose.yml build'
-
             }
         }
 
         stage('Run Containers') {
             steps {
-                sh 'docker compose -f docker-compose.yml build'
-
+                sh 'docker compose -f docker-compose.yml up -d'
             }
         }
 
         stage('Health Check') {
             steps {
-                sh '''
-                sleep 10
-                curl http://localhost:5000/health
-                '''
+                sh 'sleep 10'
+                sh 'curl http://localhost:5000/health'
             }
         }
     }
