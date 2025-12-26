@@ -11,13 +11,15 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                sh 'docker compose build'
+                sh 'docker compose -f docker-compose.yml build'
+
             }
         }
 
         stage('Run Containers') {
             steps {
-                sh 'docker compose up -d'
+                sh 'docker compose -f docker-compose.yml build'
+
             }
         }
 
@@ -33,7 +35,7 @@ pipeline {
 
     post {
         always {
-            sh 'docker compose down'
+            sh 'docker compose -f docker-compose.yml down'
         }
     }
 }
