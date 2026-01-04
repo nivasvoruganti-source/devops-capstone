@@ -7,6 +7,27 @@ pipeline {
                 sh 'docker compose -f docker-compose.yml build'
             }
         }
+        stage('Push Images to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    docker login -u $DOCKER_USER -p $DOCKER_PASS
+
+                    docker tag devops-capstone-pipeline-backend:latest $DOCKER_USER/devops-backend:latest
+                    docker tag devops-capstone-pipeline-frontend:latest $DOCKER_USER/devops-frontend:latest
+
+                    docker push $DOCKER_USER/devops-backend:latest
+                    docker push $DOCKER_USER/devops-frontend:latest
+                    '''
+                }
+            }
+        }
+
+        
 
         stage('Run Containers') {
             steps {
