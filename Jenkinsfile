@@ -2,11 +2,13 @@ pipeline {
     agent any
 
     stages {
-        stage('Build Docker Images') {
+
+        stage('Build Images') {
             steps {
-                sh 'docker compose -f docker-compose.yml build'
+                sh 'docker compose build'
             }
         }
+
         stage('Push Images to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(
@@ -17,8 +19,8 @@ pipeline {
                     sh '''
                     docker login -u $DOCKER_USER -p $DOCKER_PASS
 
-                    docker tag devops-capstone-pipeline-backend:latest $DOCKER_USER/devops-backend:latest
-                    docker tag devops-capstone-pipeline-frontend:latest $DOCKER_USER/devops-frontend:latest
+                    docker tag devops-capstone-backend:latest $DOCKER_USER/devops-backend:latest
+                    docker tag devops-capstone-frontend:latest $DOCKER_USER/devops-frontend:latest
 
                     docker push $DOCKER_USER/devops-backend:latest
                     docker push $DOCKER_USER/devops-frontend:latest
@@ -27,11 +29,13 @@ pipeline {
             }
         }
 
-        
-
-        stage('Run Containers') {
+        stage('Deploy (CD)') {
             steps {
-                sh 'docker compose -f docker-compose.yml up -d'
+                sh '''
+                docker compose -f docker-compose.deploy.yml down || true
+                docker compose -f docker-compose.deploy.yml pull
+                docker compose -f docker-compose.deploy.yml up -d
+                '''
             }
         }
 
@@ -40,12 +44,6 @@ pipeline {
                 sh 'sleep 10'
                 sh 'curl http://localhost:5000/health'
             }
-        }
-    }
-
-    post {
-        always {
-            sh 'docker compose -f docker-compose.yml down'
         }
     }
 }
