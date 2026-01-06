@@ -1,0 +1,10 @@
+services:
+  backend:
+    image: nivas24/devops-backend:latest
+    ports:
+      - "5000:5000"
+
+  frontend:
+    image: nivas24/devops-frontend:latest
+    ports:
+      - "8080:80"
